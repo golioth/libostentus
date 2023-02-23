@@ -5,12 +5,12 @@
  */
 
 #include <stdint.h>
-#include "ostentus.h"
+#include "libostentus.h"
 
 /* Add ostentus.c to the CMakeLists.txt */
 
 /*
- * This demonstrates using the ostentus.c helper functions to write to the
+ * This demonstrates using the libostentus.c helper functions to write to the
  * Ostentus board.
  */
 int main(void) {
