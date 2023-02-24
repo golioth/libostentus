@@ -40,7 +40,7 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 #define OSTENTUS_STRING_5 0x25
 #define OSTENTUS_STORE_TEXT 0x26
 
-const struct device *i2c_dev = DEVICE_DT_GET(DT_ALIAS(click_i2c));
+const struct device *ostentus_i2c_dev = DEVICE_DT_GET(DT_ALIAS(click_i2c));
 
 bool _uninitialized = true;
 bool _is_present = false;
@@ -66,7 +66,7 @@ bool ostentus_i2c_init(void) {
 	_uninitialized = false;
 
 	_ostentus_buf[0] = 0x00;
-	int err = i2c_write(i2c_dev, _ostentus_buf, 1, OSTENTUS_ADDR);
+	int err = i2c_write(ostentus_i2c_dev, _ostentus_buf, 1, OSTENTUS_ADDR);
 	if (err) {
 		LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
 		LOG_DBG("All future calls to Ostentus functions will not be sent.");
@@ -91,7 +91,7 @@ int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
 
 	_ostentus_buf[0] = reg;
 	//LOG_HEXDUMP_DBG(_ostentus_buf, data_len+1, "sending packet");
-	return i2c_write(i2c_dev, _ostentus_buf, data_len+1, OSTENTUS_ADDR);
+	return i2c_write(ostentus_i2c_dev, _ostentus_buf, data_len+1, OSTENTUS_ADDR);
 }
 
 int clear_memory(void) {
