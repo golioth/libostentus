@@ -24,6 +24,7 @@ int clear_text_buffer(void);
 int clear_rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h);
 int slide_add(uint8_t id, char *str, uint8_t len);
 int slide_set(uint8_t id, char *str, uint8_t len);
+int summary_title(char *str, uint8_t len);
 int slideshow(uint32_t setting);
 int led_bitmask(uint8_t bitmask);
 int led_power_set(uint8_t state);
