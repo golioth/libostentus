@@ -26,6 +26,7 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 #define OSTENTUS_SLIDE_ADD 0x0A
 #define OSTENTUS_SLIDE_SET 0x0B
 #define OSTENTUS_SLIDESHOW 0x0C
+#define OSTENTUS_SUMMARY_TITLE 0x0D
 #define OSTENTUS_LED_USE 0x10
 #define OSTENTUS_LED_GOL 0x11
 #define OSTENTUS_LED_INT 0x12
@@ -138,6 +139,11 @@ int slide_set(uint8_t id, char *str, uint8_t len) {
 	_ostentus_buf[1] = id;
 	memcpy(_ostentus_buf+2, str, len);
 	return ostentus_i2c_write(OSTENTUS_SLIDE_SET, len+1);
+}
+
+int summary_title(char *str, uint8_t len) {
+	memcpy(_ostentus_buf+1, str, len);
+	return ostentus_i2c_write(OSTENTUS_SUMMARY_TITLE, len);
 }
 
 int slideshow(uint32_t setting) {
