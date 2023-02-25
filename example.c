@@ -61,6 +61,8 @@ int main(void) {
 	/* Set up sensor display slides for slideshow */
 	slide_add(1, "Temperature", strlen("Temperature"));
 	slide_add(2, "Pressure", strlen("Pressure"));
+	/* Set the title ofthe Ostentus summary slide (optional) */
+	summary_title("Weather:", strlen("Weather:"));
 	slideshow(30000);
 
 	/* Simulated values */
