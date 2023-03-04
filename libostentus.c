@@ -41,6 +41,8 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 #define OSTENTUS_STRING_5 0x25
 #define OSTENTUS_STORE_TEXT 0x26
 
+K_MUTEX_DEFINE(ostentus_mutex);
+
 const struct device *ostentus_i2c_dev = DEVICE_DT_GET(DT_ALIAS(click_i2c));
 
 bool _uninitialized = true;
@@ -64,6 +66,11 @@ uint8_t _ostentus_buf[BUF_SIZE];
  * @return the new value of _is_present
  */
 bool ostentus_i2c_init(void) {
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_uninitialized = false;
 
 	_ostentus_buf[0] = 0x00;
@@ -77,10 +84,22 @@ bool ostentus_i2c_init(void) {
 		LOG_INF("Ostentus present at i2c address: 0x%02X", OSTENTUS_ADDR);
 		_is_present = true;
 	}
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	return _is_present;
 }
 
 int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	if (_uninitialized) {
 		ostentus_i2c_init();
 	}
@@ -92,7 +111,13 @@ int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
 
 	_ostentus_buf[0] = reg;
 	//LOG_HEXDUMP_DBG(_ostentus_buf, data_len+1, "sending packet");
-	return i2c_write(ostentus_i2c_dev, _ostentus_buf, data_len+1, OSTENTUS_ADDR);
+	err = i2c_write(ostentus_i2c_dev, _ostentus_buf, data_len+1, OSTENTUS_ADDR);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+	
+	return err;
 }
 
 int clear_memory(void) {
@@ -108,13 +133,39 @@ int update_display(void) {
 }
 
 int update_thickness(uint8_t thickness) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = thickness;
-	return ostentus_i2c_write(OSTENTUS_THICKNESS, 1);
+	err = ostentus_i2c_write(OSTENTUS_THICKNESS, 1);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int update_font(uint8_t font) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = font;
-	return ostentus_i2c_write(OSTENTUS_FONT, 1);
+	err = ostentus_i2c_write(OSTENTUS_FONT, 1);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int clear_text_buffer(void) {
@@ -122,73 +173,243 @@ int clear_text_buffer(void) {
 }
 
 int clear_rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = x;
 	_ostentus_buf[2] = y;
 	_ostentus_buf[3] = w;
 	_ostentus_buf[4] = h;
-	return ostentus_i2c_write(OSTENTUS_CLEAR_RECT, 4);
+	err = ostentus_i2c_write(OSTENTUS_CLEAR_RECT, 4);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int slide_add(uint8_t id, char *str, uint8_t len) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = id;
 	memcpy(_ostentus_buf+2, str, len);
-	return ostentus_i2c_write(OSTENTUS_SLIDE_ADD, len+1);
+
+	err = ostentus_i2c_write(OSTENTUS_SLIDE_ADD, len+1);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int slide_set(uint8_t id, char *str, uint8_t len) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = id;
 	memcpy(_ostentus_buf+2, str, len);
-	return ostentus_i2c_write(OSTENTUS_SLIDE_SET, len+1);
+	err = ostentus_i2c_write(OSTENTUS_SLIDE_SET, len+1);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int summary_title(char *str, uint8_t len) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	memcpy(_ostentus_buf+1, str, len);
-	return ostentus_i2c_write(OSTENTUS_SUMMARY_TITLE, len);
+	err = ostentus_i2c_write(OSTENTUS_SUMMARY_TITLE, len);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int slideshow(uint32_t setting) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	memcpy(_ostentus_buf+1, &setting, 4);
-	return ostentus_i2c_write(OSTENTUS_SLIDESHOW, 4);
+	err = ostentus_i2c_write(OSTENTUS_SLIDESHOW, 4);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int led_bitmask(uint8_t bitmask) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = bitmask;
-	return ostentus_i2c_write(OSTENTUS_LED_BITMASK, 1);
+	err = ostentus_i2c_write(OSTENTUS_LED_BITMASK, 1);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int led_power_set(uint8_t state) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = state ? 1 : 0;
-	return ostentus_i2c_write(OSTENTUS_LED_POW, 1);
+	err = ostentus_i2c_write(OSTENTUS_LED_POW, 1);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int led_battery_set(uint8_t state) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = state ? 1 : 0;
-	return ostentus_i2c_write(OSTENTUS_LED_BAT, 1);
+	err = ostentus_i2c_write(OSTENTUS_LED_BAT, 1);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int led_internet_set(uint8_t state) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = state ? 1 : 0;
-	return ostentus_i2c_write(OSTENTUS_LED_INT, 1);
+	err = ostentus_i2c_write(OSTENTUS_LED_INT, 1);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+	
+	return err;
 }
 
 int led_golioth_set(uint8_t state) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = state ? 1 : 0;
-	return ostentus_i2c_write(OSTENTUS_LED_GOL, 1);
+	err = ostentus_i2c_write(OSTENTUS_LED_GOL, 1);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int led_user_set(uint8_t state) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = state ? 1 : 0;
-	return ostentus_i2c_write(OSTENTUS_LED_USE, 1);
+	err = ostentus_i2c_write(OSTENTUS_LED_USE, 1);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int store_text(char *str, uint8_t len) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	memcpy(_ostentus_buf+1, str, len);
 	return ostentus_i2c_write(OSTENTUS_STORE_TEXT, len);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
 
 int write_text(uint8_t x, uint8_t y, uint8_t thickness) {
+	int err;
+
+	LOG_DBG("Requesting Ostentus mutex lock");
+	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	LOG_DBG("Locked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
 	_ostentus_buf[1] = x;
 	_ostentus_buf[2] = y;
 	_ostentus_buf[3] = thickness;
-	return ostentus_i2c_write(OSTENTUS_WRITE_TEXT, 3);
+	err = ostentus_i2c_write(OSTENTUS_WRITE_TEXT, 3);
+
+	k_mutex_unlock(&ostentus_mutex);
+	LOG_DBG("Unlocked Ostentus mutex (lock count: %u)",
+		ostentus_mutex.lock_count);
+
+	return err;
 }
