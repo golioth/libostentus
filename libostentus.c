@@ -118,12 +118,16 @@ int update_display(void) {
 int update_thickness(uint8_t thickness) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = thickness;
+		err = ostentus_i2c_write(OSTENTUS_THICKNESS, 1);
 
-	_ostentus_buf[1] = thickness;
-	err = ostentus_i2c_write(OSTENTUS_THICKNESS, 1);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -131,12 +135,16 @@ int update_thickness(uint8_t thickness) {
 int update_font(uint8_t font) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = font;
+		err = ostentus_i2c_write(OSTENTUS_FONT, 1);
 
-	_ostentus_buf[1] = font;
-	err = ostentus_i2c_write(OSTENTUS_FONT, 1);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -148,15 +156,19 @@ int clear_text_buffer(void) {
 int clear_rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = x;
+		_ostentus_buf[2] = y;
+		_ostentus_buf[3] = w;
+		_ostentus_buf[4] = h;
+		err = ostentus_i2c_write(OSTENTUS_CLEAR_RECT, 4);
 
-	_ostentus_buf[1] = x;
-	_ostentus_buf[2] = y;
-	_ostentus_buf[3] = w;
-	_ostentus_buf[4] = h;
-	err = ostentus_i2c_write(OSTENTUS_CLEAR_RECT, 4);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -164,14 +176,18 @@ int clear_rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
 int slide_add(uint8_t id, char *str, uint8_t len) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = id;
+		memcpy(_ostentus_buf+2, str, len);
 
-	_ostentus_buf[1] = id;
-	memcpy(_ostentus_buf+2, str, len);
+		err = ostentus_i2c_write(OSTENTUS_SLIDE_ADD, len+1);
 
-	err = ostentus_i2c_write(OSTENTUS_SLIDE_ADD, len+1);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -179,13 +195,17 @@ int slide_add(uint8_t id, char *str, uint8_t len) {
 int slide_set(uint8_t id, char *str, uint8_t len) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = id;
+		memcpy(_ostentus_buf+2, str, len);
+		err = ostentus_i2c_write(OSTENTUS_SLIDE_SET, len+1);
 
-	_ostentus_buf[1] = id;
-	memcpy(_ostentus_buf+2, str, len);
-	err = ostentus_i2c_write(OSTENTUS_SLIDE_SET, len+1);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -193,12 +213,16 @@ int slide_set(uint8_t id, char *str, uint8_t len) {
 int summary_title(char *str, uint8_t len) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		memcpy(_ostentus_buf+1, str, len);
+		err = ostentus_i2c_write(OSTENTUS_SUMMARY_TITLE, len);
 
-	memcpy(_ostentus_buf+1, str, len);
-	err = ostentus_i2c_write(OSTENTUS_SUMMARY_TITLE, len);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -206,12 +230,16 @@ int summary_title(char *str, uint8_t len) {
 int slideshow(uint32_t setting) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		memcpy(_ostentus_buf+1, &setting, 4);
+		err = ostentus_i2c_write(OSTENTUS_SLIDESHOW, 4);
 
-	memcpy(_ostentus_buf+1, &setting, 4);
-	err = ostentus_i2c_write(OSTENTUS_SLIDESHOW, 4);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -219,12 +247,16 @@ int slideshow(uint32_t setting) {
 int led_bitmask(uint8_t bitmask) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = bitmask;
+		err = ostentus_i2c_write(OSTENTUS_LED_BITMASK, 1);
 
-	_ostentus_buf[1] = bitmask;
-	err = ostentus_i2c_write(OSTENTUS_LED_BITMASK, 1);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -232,12 +264,16 @@ int led_bitmask(uint8_t bitmask) {
 int led_power_set(uint8_t state) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = state ? 1 : 0;
+		err = ostentus_i2c_write(OSTENTUS_LED_POW, 1);
 
-	_ostentus_buf[1] = state ? 1 : 0;
-	err = ostentus_i2c_write(OSTENTUS_LED_POW, 1);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -245,12 +281,16 @@ int led_power_set(uint8_t state) {
 int led_battery_set(uint8_t state) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = state ? 1 : 0;
+		err = ostentus_i2c_write(OSTENTUS_LED_BAT, 1);
 
-	_ostentus_buf[1] = state ? 1 : 0;
-	err = ostentus_i2c_write(OSTENTUS_LED_BAT, 1);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -258,25 +298,33 @@ int led_battery_set(uint8_t state) {
 int led_internet_set(uint8_t state) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = state ? 1 : 0;
+		err = ostentus_i2c_write(OSTENTUS_LED_INT, 1);
 
-	_ostentus_buf[1] = state ? 1 : 0;
-	err = ostentus_i2c_write(OSTENTUS_LED_INT, 1);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
-	
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
+
 	return err;
 }
 
 int led_golioth_set(uint8_t state) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = state ? 1 : 0;
+		err = ostentus_i2c_write(OSTENTUS_LED_GOL, 1);
 
-	_ostentus_buf[1] = state ? 1 : 0;
-	err = ostentus_i2c_write(OSTENTUS_LED_GOL, 1);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -284,12 +332,16 @@ int led_golioth_set(uint8_t state) {
 int led_user_set(uint8_t state) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = state ? 1 : 0;
+		err = ostentus_i2c_write(OSTENTUS_LED_USE, 1);
 
-	_ostentus_buf[1] = state ? 1 : 0;
-	err = ostentus_i2c_write(OSTENTUS_LED_USE, 1);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -297,12 +349,16 @@ int led_user_set(uint8_t state) {
 int store_text(char *str, uint8_t len) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		memcpy(_ostentus_buf+1, str, len);
+		return ostentus_i2c_write(OSTENTUS_STORE_TEXT, len);
 
-	memcpy(_ostentus_buf+1, str, len);
-	return ostentus_i2c_write(OSTENTUS_STORE_TEXT, len);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
@@ -310,14 +366,18 @@ int store_text(char *str, uint8_t len) {
 int write_text(uint8_t x, uint8_t y, uint8_t thickness) {
 	int err;
 
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_ostentus_buf[1] = x;
+		_ostentus_buf[2] = y;
+		_ostentus_buf[3] = thickness;
+		err = ostentus_i2c_write(OSTENTUS_WRITE_TEXT, 3);
 
-	_ostentus_buf[1] = x;
-	_ostentus_buf[2] = y;
-	_ostentus_buf[3] = thickness;
-	err = ostentus_i2c_write(OSTENTUS_WRITE_TEXT, 3);
+		k_mutex_unlock(&ostentus_mutex);
 
-	k_mutex_unlock(&ostentus_mutex);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLOCK;
+	}
 
 	return err;
 }
