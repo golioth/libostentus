@@ -66,12 +66,10 @@ uint8_t _ostentus_buf[BUF_SIZE];
  * @return the new value of _is_present
  */
 bool ostentus_i2c_init(void) {
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
-
 	_uninitialized = false;
 
-	_ostentus_buf[0] = 0x00;
-	int err = i2c_write(ostentus_i2c_dev, _ostentus_buf, 1, OSTENTUS_ADDR);
+	char o_init_buf[1] = { OSTENTUS_CLEAR_MEM };
+	int err = i2c_write(ostentus_i2c_dev, o_init_buf, 1, OSTENTUS_ADDR);
 	if (err) {
 		LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
 		LOG_DBG("All future calls to Ostentus functions will not be sent.");
@@ -82,15 +80,11 @@ bool ostentus_i2c_init(void) {
 		_is_present = true;
 	}
 
-	k_mutex_unlock(&ostentus_mutex);
-
 	return _is_present;
 }
 
-int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
+static int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
 	int err;
-
-	k_mutex_lock(&ostentus_mutex, K_FOREVER);
 
 	if (_uninitialized) {
 		ostentus_i2c_init();
@@ -106,8 +100,6 @@ int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
 	//LOG_HEXDUMP_DBG(_ostentus_buf, data_len+1, "sending packet");
 	err = i2c_write(ostentus_i2c_dev, _ostentus_buf, data_len+1, OSTENTUS_ADDR);
 
-	k_mutex_unlock(&ostentus_mutex);
-	
 	return err;
 }
 
