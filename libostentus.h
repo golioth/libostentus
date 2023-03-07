@@ -15,6 +15,8 @@
 #define LED_BAT 0x08
 #define LED_POW 0x10
 
+bool ostentus_i2c_init(void);
+int ostentus_i2c_write(uint8_t reg, uint8_t data_len);
 int clear_memory(void);
 int show_splash(void);
 int update_display(void);
