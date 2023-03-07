@@ -126,7 +126,7 @@ int update_thickness(uint8_t thickness) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -143,7 +143,7 @@ int update_font(uint8_t font) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -167,7 +167,7 @@ int clear_rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -186,7 +186,7 @@ int slide_add(uint8_t id, char *str, uint8_t len) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -204,7 +204,7 @@ int slide_set(uint8_t id, char *str, uint8_t len) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -221,7 +221,7 @@ int summary_title(char *str, uint8_t len) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -238,7 +238,7 @@ int slideshow(uint32_t setting) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -255,7 +255,7 @@ int led_bitmask(uint8_t bitmask) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -272,7 +272,7 @@ int led_power_set(uint8_t state) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -289,7 +289,7 @@ int led_battery_set(uint8_t state) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -306,7 +306,7 @@ int led_internet_set(uint8_t state) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -323,7 +323,7 @@ int led_golioth_set(uint8_t state) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -340,7 +340,7 @@ int led_user_set(uint8_t state) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -357,7 +357,7 @@ int store_text(char *str, uint8_t len) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
@@ -376,7 +376,7 @@ int write_text(uint8_t x, uint8_t y, uint8_t thickness) {
 
 	} else {
 		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
-		return -ENOLOCK;
+		return -ENOLCK;
 	}
 
 	return err;
