@@ -9,6 +9,7 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 
 #include <zephyr/drivers/i2c.h>
 #include <zephyr/device.h>
+#include <zephyr/sys/byteorder.h>
 #include <string.h>
 
 #define OSTENTUS_ADDR 0x12
@@ -113,22 +114,22 @@ int ostentus_i2c_write2(uint8_t reg,
 	}
 
 	/* Detect how many i2c messages there are and which is the last one */
-	for (int i = 1; i < ARRAY_SIZE(msgs); i < 0) {
+	for (int i = 1; i < ARRAY_SIZE(msgs); i++) {
 		if (!msgs[i].len) {
 			msgs[i - 1].flags |= I2C_MSG_STOP;
 			num_msgs = i;
 		}
 	}
 
-	return i2c_transfer_dt(&ostentus_dev, &msgs, num_msgs);
+	return i2c_transfer_dt(&ostentus_dev, msgs, num_msgs);
 }
 
 int ostentus_i2c_write1(uint8_t reg, uint8_t *data, uint8_t data_len) {
 	return ostentus_i2c_write2(reg, data, data_len, NULL, 0);
 }
 
-int ostentus_i2c_write0(uint8_t reg, uint8_t *data, uint8_t data_len) {
-	return ostentus_i2c_write1(reg, NULL, 0, NULL, 0);
+int ostentus_i2c_write0(uint8_t reg) {
+	return ostentus_i2c_write2(reg, NULL, 0, NULL, 0);
 }
 
 int clear_memory(void) {
@@ -173,8 +174,15 @@ int summary_title(char *str, uint8_t len) {
 }
 
 int slideshow(uint32_t setting) {
-	uint32_t setting_le = sys_cpu_to_le32(setting);
-	return ostentus_i2c_write1(OSTENTUS_SLIDESHOW, &setting_le, sizeof(setting_le));
+	union {
+		uint32_t setting_le;
+		uint8_t setting_buf[4];
+	} slideshow_delay_u;
+
+	slideshow_delay_u.setting_le = sys_cpu_to_le32(setting);
+	return ostentus_i2c_write1(OSTENTUS_SLIDESHOW,
+			slideshow_delay_u.setting_buf,
+			sizeof(slideshow_delay_u.setting_buf));
 }
 
 int led_bitmask(uint8_t bitmask) {
@@ -212,5 +220,5 @@ int store_text(char *str, uint8_t len) {
 
 int write_text(uint8_t x, uint8_t y, uint8_t thickness) {
 	uint8_t data[] = { x, y, thickness };
-	return ostentus_i2c_write(OSTENTUS_WRITE_TEXT, data, sizeof(data));
+	return ostentus_i2c_write1(OSTENTUS_WRITE_TEXT, data, sizeof(data));
 }
