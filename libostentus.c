@@ -66,39 +66,55 @@ uint8_t _ostentus_buf[BUF_SIZE];
  * @return the new value of _is_present
  */
 bool ostentus_i2c_init(void) {
-	_uninitialized = false;
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		_uninitialized = false;
 
-	char o_init_buf[1] = { OSTENTUS_CLEAR_MEM };
-	int err = i2c_write(ostentus_i2c_dev, o_init_buf, 1, OSTENTUS_ADDR);
-	if (err) {
-		LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
-		LOG_DBG("All future calls to Ostentus functions will not be sent.");
-		_is_present = false;
-	}
-	else {
-		LOG_INF("Ostentus present at i2c address: 0x%02X", OSTENTUS_ADDR);
-		_is_present = true;
+		char o_init_buf[1] = { OSTENTUS_CLEAR_MEM };
+		int err = i2c_write(ostentus_i2c_dev, o_init_buf, 1, OSTENTUS_ADDR);
+		if (err) {
+			LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
+			LOG_DBG("All future calls to Ostentus functions will not be sent.");
+			_is_present = false;
+		}
+		else {
+			LOG_INF("Ostentus present at i2c address: 0x%02X", OSTENTUS_ADDR);
+			_is_present = true;
+		}
+
+		k_mutex_unlock(&ostentus_mutex);
+
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLCK;
 	}
 
 	return _is_present;
 }
 
-static int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
+int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
 	int err;
 
-	if (_uninitialized) {
-		ostentus_i2c_init();
-	}
+	if (k_mutex_lock(&ostentus_mutex, K_MSEC(10)) == 0) {
+		if (_uninitialized) {
+			ostentus_i2c_init();
+		}
 
-	if (_is_present == false) {
-		LOG_DBG("Ostentus not present, command not sent.");
+		if (_is_present == false) {
+			LOG_DBG("Ostentus not present, command not sent.");
+			k_mutex_unlock(&ostentus_mutex);
+			return -EFAULT;
+		}
+
+		_ostentus_buf[0] = reg;
+		//LOG_HEXDUMP_DBG(_ostentus_buf, data_len+1, "sending packet");
+		err = i2c_write(ostentus_i2c_dev, _ostentus_buf, data_len+1, OSTENTUS_ADDR);
+
 		k_mutex_unlock(&ostentus_mutex);
-		return -EFAULT;
-	}
 
-	_ostentus_buf[0] = reg;
-	//LOG_HEXDUMP_DBG(_ostentus_buf, data_len+1, "sending packet");
-	err = i2c_write(ostentus_i2c_dev, _ostentus_buf, data_len+1, OSTENTUS_ADDR);
+	} else {
+		LOG_WRN("Unable to lock Ostentus mutex, i2c bundle unsent.");
+		return -ENOLCK;
+	}
 
 	return err;
 }
