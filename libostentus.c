@@ -67,10 +67,11 @@ uint8_t _ostentus_buf[BUF_SIZE];
  * @return the new value of _is_present
  */
 bool ostentus_i2c_init(void) {
+	uint8_t byte = 0x00;
+
 	_uninitialized = false;
 
-	_ostentus_buf[0] = 0x00;
-	int err = i2c_write_dt(&ostentus_dev, _ostentus_buf, 1);
+	int err = i2c_write_dt(&ostentus_dev, &byte, 1);
 	if (err) {
 		LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
 		LOG_DBG("All future calls to Ostentus functions will not be sent.");
