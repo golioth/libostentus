@@ -85,7 +85,6 @@ int ostentus_i2c_write(uint8_t reg, uint8_t data_len) {
 	}
 
 	if (_is_present == false) {
-		LOG_DBG("Ostentus not present, command not sent.");
 		return -EFAULT;
 	}
 
