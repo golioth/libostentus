@@ -1,0 +1,8 @@
+config LIB_OSTENTUS
+	bool "Enable the helper library for the Golioth Ostentus faceplate"
+	default n
+	depends on I2C
+	help
+	  Helper functions for controlling the Golioth Ostentus faceplate.
+	  Features include controlling LEDs, adding slides and slide data,
+	  enabling slideshows, etc.
