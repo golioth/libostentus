@@ -131,6 +131,20 @@ int ostentus_i2c_write0(uint8_t reg) {
 	return ostentus_i2c_write2(reg, NULL, 0, NULL, 0);
 }
 
+uint8_t ostentus_i2c_readbyte(uint8_t reg) {
+  uint8_t write_reg[1] = { reg };
+  uint8_t read_reg[1] = { 0 };
+  i2c_write_read_dt(&ostentus_dev, write_reg, 1, read_reg, 1);
+  return read_reg[0];
+}
+
+int ostentus_i2c_readarray(uint8_t reg, uint8_t *read_reg, uint8_t read_len) {
+  int err;
+  uint8_t write_reg[1] = { reg };
+  err = i2c_write_read_dt(&ostentus_dev, write_reg, 1, read_reg, read_len);
+  return err;
+}
+
 int clear_memory(void) {
 	return ostentus_i2c_write0(OSTENTUS_CLEAR_MEM);
 }
