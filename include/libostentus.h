@@ -34,5 +34,7 @@ int led_golioth_set(uint8_t state);
 int led_user_set(uint8_t state);
 int store_text(char *str, uint8_t len);
 int write_text(uint8_t x, uint8_t y, uint8_t thickness);
+uint8_t ostentus_i2c_readbyte(uint8_t reg);
+int ostentus_i2c_readarray(uint8_t reg, uint8_t *read_reg, uint8_t read_len);
 
 #endif
