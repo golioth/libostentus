@@ -9,6 +9,7 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 
 #include <zephyr/drivers/i2c.h>
 #include <zephyr/device.h>
+#include <zephyr/kernel.h>
 #include <zephyr/sys/byteorder.h>
 #include <string.h>
 
@@ -41,6 +42,9 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 #define OSTENTUS_STRING_4 0x24
 #define OSTENTUS_STRING_5 0x25
 #define OSTENTUS_STORE_TEXT 0x26
+#define OSTENTUS_GET_VERSION 0x30
+#define OSTENTUS_ISREADY 0x31
+#define OSTENTUS_RESET 0x3F
 
 const struct i2c_dt_spec ostentus_dev = {
 	.bus = DEVICE_DT_GET(DT_ALIAS(click_i2c)),
@@ -198,8 +202,15 @@ int slideshow(uint32_t setting) {
 			sizeof(slideshow_delay_u.setting_buf));
 }
 
+int ostentus_version_get(char *buf, uint8_t buf_len) {
+  uint8_t semver[3] = { 0 };
+  int err = ostentus_i2c_readarray(OSTENTUS_GET_VERSION, semver, 3);
+  snprintk(buf, buf_len, "v%d.%d.%d", semver[0], semver[1], semver[2]);
+  return err;
+}
+
 int led_bitmask(uint8_t bitmask) {
-	return ostentus_i2c_write1(OSTENTUS_LED_BITMASK, &bitmask, 1);
+  return ostentus_i2c_write1(OSTENTUS_LED_BITMASK, &bitmask, 1);
 }
 
 int led_power_set(uint8_t state) {

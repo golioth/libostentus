@@ -8,6 +8,7 @@
 #define __OSTENTUS_WORK_H__
 #include <zephyr/drivers/i2c.h>
 #include <zephyr/device.h>
+#include <stdint.h>
 
 #define LED_USE 0x01
 #define LED_GOL 0x02
@@ -26,6 +27,7 @@ int slide_add(uint8_t id, char *str, uint8_t len);
 int slide_set(uint8_t id, char *str, uint8_t len);
 int summary_title(char *str, uint8_t len);
 int slideshow(uint32_t setting);
+int ostentus_version_get(char *buf, uint8_t buf_len);
 int led_bitmask(uint8_t bitmask);
 int led_power_set(uint8_t state);
 int led_battery_set(uint8_t state);
