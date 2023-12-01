@@ -13,6 +13,8 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 #include <string.h>
 
 #define OSTENTUS_ADDR 0x12
+#define OSTENTUS_RETRIES 4
+#define OSTENTUS_RETRY_DELAY_MS 1000
 
 #define OSTENTUS_CLEAR_MEM 0x00
 #define OSTENTUS_REFRESH 0x01
@@ -64,11 +66,21 @@ bool _is_present = false;
  * @return the new value of _is_present
  */
 bool ostentus_i2c_init(void) {
+	int err;
+	int retries;
 	uint8_t byte = 0x00;
 
 	_uninitialized = false;
 
-	int err = i2c_write_dt(&ostentus_dev, &byte, 1);
+	retries = 0;
+	do {
+		err = i2c_write_dt(&ostentus_dev, &byte, 1);
+		if (err == 0) {
+			break;
+		}
+		retries++;
+		k_msleep(OSTENTUS_RETRY_DELAY_MS);
+	} while (retries < OSTENTUS_RETRIES);
 	if (err) {
 		LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
 		LOG_DBG("All future calls to Ostentus functions will not be sent.");
@@ -78,12 +90,15 @@ bool ostentus_i2c_init(void) {
 		LOG_INF("Ostentus present at i2c address: 0x%02X", ostentus_dev.addr);
 		_is_present = true;
 	}
+
 	return _is_present;
 }
 
 int ostentus_i2c_write2(uint8_t reg,
 			uint8_t *data1, uint8_t data1_len,
 			uint8_t *data2, uint8_t data2_len) {
+	int err;
+	int retries;
 
 	struct i2c_msg msgs[] = {
 		{
@@ -120,7 +135,21 @@ int ostentus_i2c_write2(uint8_t reg,
 		}
 	}
 
-	return i2c_transfer_dt(&ostentus_dev, msgs, num_msgs);
+	retries = 0;
+	do {
+		err = i2c_transfer_dt(&ostentus_dev, msgs, num_msgs);
+		if (err == 0) {
+			break;
+		}
+		retries++;
+		k_msleep(OSTENTUS_RETRY_DELAY_MS);
+	} while (retries < OSTENTUS_RETRIES);
+	if (err) {
+		LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
+		_is_present = false;
+	}
+
+	return err;
 }
 
 int ostentus_i2c_write1(uint8_t reg, uint8_t *data, uint8_t data_len) {
