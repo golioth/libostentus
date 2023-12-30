@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef __OSTENTUS_WORK_H__
-#define __OSTENTUS_WORK_H__
+#ifndef __LIBOSTENTUS_H__
+#define __LIBOSTENTUS_H__
 #include <zephyr/drivers/i2c.h>
 #include <zephyr/device.h>
 #include <stdint.h>

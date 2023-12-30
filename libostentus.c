@@ -12,39 +12,9 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 #include <zephyr/kernel.h>
 #include <zephyr/sys/byteorder.h>
 #include <string.h>
+#include <libostentus_regmap.h>
 
 #define OSTENTUS_ADDR 0x12
-
-#define OSTENTUS_CLEAR_MEM 0x00
-#define OSTENTUS_REFRESH 0x01
-#define OSTENTUS_ADDR_X 0x02
-#define OSTENTUS_ADDR_Y 0x03
-#define OSTENTUS_SPLASHSCREEN 0x04
-#define OSTENTUS_THICKNESS 0x05
-#define OSTENTUS_FONT 0x06
-#define OSTENTUS_WRITE_TEXT 0x07
-#define OSTENTUS_CLEAR_TEXT 0x08
-#define OSTENTUS_CLEAR_RECT 0x09
-#define OSTENTUS_SLIDE_ADD 0x0A
-#define OSTENTUS_SLIDE_SET 0x0B
-#define OSTENTUS_SLIDESHOW 0x0C
-#define OSTENTUS_SUMMARY_TITLE 0x0D
-#define OSTENTUS_LED_USE 0x10
-#define OSTENTUS_LED_GOL 0x11
-#define OSTENTUS_LED_INT 0x12
-#define OSTENTUS_LED_BAT 0x13
-#define OSTENTUS_LED_POW 0x14
-#define OSTENTUS_LED_BITMASK 0x18
-#define OSTENTUS_STRING_0 0x20
-#define OSTENTUS_STRING_1 0x21
-#define OSTENTUS_STRING_2 0x22
-#define OSTENTUS_STRING_3 0x23
-#define OSTENTUS_STRING_4 0x24
-#define OSTENTUS_STRING_5 0x25
-#define OSTENTUS_STORE_TEXT 0x26
-#define OSTENTUS_GET_VERSION 0x30
-#define OSTENTUS_ISREADY 0x31
-#define OSTENTUS_RESET 0x3F
 
 const struct i2c_dt_spec ostentus_dev = {
 	.bus = DEVICE_DT_GET(DT_ALIAS(click_i2c)),
