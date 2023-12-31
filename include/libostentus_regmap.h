@@ -35,7 +35,10 @@
 #define OSTENTUS_STRING_5 0x25
 #define OSTENTUS_STORE_TEXT 0x26
 #define OSTENTUS_GET_VERSION 0x30
-#define OSTENTUS_ISREADY 0x31
+#define OSTENTUS_FIFO_READY 0x31
 #define OSTENTUS_RESET 0x3F
+
+/* Magic number to verify reset command was intentional */
+#define OSTENTUS_RESET_MAGIC 0xA5
 
 #endif
