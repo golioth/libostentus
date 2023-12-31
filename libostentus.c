@@ -105,11 +105,8 @@ int ostentus_i2c_write0(uint8_t reg) {
 	return ostentus_i2c_write2(reg, NULL, 0, NULL, 0);
 }
 
-uint8_t ostentus_i2c_readbyte(uint8_t reg) {
-  uint8_t write_reg[1] = { reg };
-  uint8_t read_reg[1] = { 0 };
-  i2c_write_read_dt(&ostentus_dev, write_reg, 1, read_reg, 1);
-  return read_reg[0];
+int ostentus_i2c_readbyte(uint8_t reg, uint8_t *value) {
+  return i2c_write_read_dt(&ostentus_dev, &reg, 1, value, 1);
 }
 
 int ostentus_i2c_readarray(uint8_t reg, uint8_t *read_reg, uint8_t read_len) {
@@ -177,6 +174,15 @@ int ostentus_version_get(char *buf, uint8_t buf_len) {
   int err = ostentus_i2c_readarray(OSTENTUS_GET_VERSION, semver, 3);
   snprintk(buf, buf_len, "v%d.%d.%d", semver[0], semver[1], semver[2]);
   return err;
+}
+
+int ostentus_fifo_ready(uint8_t *slots_remaining) {
+  return ostentus_i2c_readbyte(OSTENTUS_FIFO_READY, slots_remaining);
+}
+
+int ostentus_reset(void) {
+  uint8_t magic = OSTENTUS_RESET_MAGIC;
+  return ostentus_i2c_write1(OSTENTUS_RESET, &magic, 1);
 }
 
 int led_bitmask(uint8_t bitmask) {

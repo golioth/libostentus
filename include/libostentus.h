@@ -28,6 +28,8 @@ int slide_set(uint8_t id, char *str, uint8_t len);
 int summary_title(char *str, uint8_t len);
 int slideshow(uint32_t setting);
 int ostentus_version_get(char *buf, uint8_t buf_len);
+int ostentus_fifo_ready(uint8_t *slots_remaining);
+int ostentus_reset(void);
 int led_bitmask(uint8_t bitmask);
 int led_power_set(uint8_t state);
 int led_battery_set(uint8_t state);
@@ -36,7 +38,7 @@ int led_golioth_set(uint8_t state);
 int led_user_set(uint8_t state);
 int store_text(char *str, uint8_t len);
 int write_text(uint8_t x, uint8_t y, uint8_t thickness);
-uint8_t ostentus_i2c_readbyte(uint8_t reg);
+int ostentus_i2c_readbyte(uint8_t reg, uint8_t *value);
 int ostentus_i2c_readarray(uint8_t reg, uint8_t *read_reg, uint8_t read_len);
 
 #endif
