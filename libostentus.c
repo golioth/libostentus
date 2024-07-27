@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#define DT_DRV_COMPAT golioth_ostentus
+
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 
