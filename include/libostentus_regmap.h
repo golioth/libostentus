@@ -7,6 +7,12 @@
 #ifndef __LIBOSTENTUS_REGMAP_H__
 #define __LIBOSTENTUS_REGMAP_H__
 
+#define LED_USE 0x01
+#define LED_GOL 0x02
+#define LED_INT 0x04
+#define LED_BAT 0x08
+#define LED_POW 0x10
+
 #define OSTENTUS_CLEAR_MEM     0x00
 #define OSTENTUS_REFRESH       0x01
 #define OSTENTUS_ADDR_X	       0x02
