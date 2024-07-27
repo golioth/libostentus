@@ -107,12 +107,12 @@ int ostentus_i2c_write0(uint8_t reg)
 	return ostentus_i2c_write2(reg, NULL, 0, NULL, 0);
 }
 
-int ostentus_i2c_readbyte(uint8_t reg, uint8_t *value)
+int i2c_readbyte(uint8_t reg, uint8_t *value)
 {
 	return i2c_write_read_dt(&ostentus_dev, &reg, 1, value, 1);
 }
 
-int ostentus_i2c_readarray(uint8_t reg, uint8_t *read_reg, uint8_t read_len)
+int i2c_readarray(uint8_t reg, uint8_t *read_reg, uint8_t read_len)
 {
 	int err;
 	uint8_t write_reg[1] = {reg};
@@ -183,7 +183,7 @@ int slideshow(uint32_t setting)
 				   sizeof(slideshow_delay_u.setting_buf));
 }
 
-int ostentus_version_get(char *buf, uint8_t buf_len)
+int version_get(char *buf, uint8_t buf_len)
 {
 	uint8_t semver[3] = {0};
 	int err = ostentus_i2c_readarray(OSTENTUS_GET_VERSION, semver, 3);
@@ -191,12 +191,12 @@ int ostentus_version_get(char *buf, uint8_t buf_len)
 	return err;
 }
 
-int ostentus_fifo_ready(uint8_t *slots_remaining)
+int fifo_ready(uint8_t *slots_remaining)
 {
 	return ostentus_i2c_readbyte(OSTENTUS_FIFO_READY, slots_remaining);
 }
 
-int ostentus_reset(void)
+int reset(void)
 {
 	uint8_t magic = OSTENTUS_RESET_MAGIC;
 	return ostentus_i2c_write1(OSTENTUS_RESET, &magic, 1);
