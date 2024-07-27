@@ -56,29 +56,32 @@ __subsystem struct ostentus_driver_api {
 	ostentus_i2c_readarray_t ostentus_i2c_readarray;
 };
 
-__syscall int clear_memory(const struct device *dev);
-__syscall int show_splash(const struct device *dev);
-__syscall int update_display(const struct device *dev);
-__syscall int update_thickness(const struct device *dev, uint8_t thickness);
-__syscall int update_font(const struct device *dev, uint8_t font);
-__syscall int clear_text_buffer(const struct device *dev);
-__syscall int clear_rectangle(const struct device *dev, uint8_t x, uint8_t y, uint8_t w, uint8_t h);
-__syscall int slide_add(const struct device *dev, uint8_t id, char *str, uint8_t len);
-__syscall int slide_set(const struct device *dev, uint8_t id, char *str, uint8_t len);
-__syscall int summary_title(const struct device *dev, char *str, uint8_t len);
-__syscall int slideshow(const struct device *dev, uint32_t setting);
+__syscall int ostentus_clear_memory(const struct device *dev);
+__syscall int ostentus_show_splash(const struct device *dev);
+__syscall int ostentus_update_display(const struct device *dev);
+__syscall int ostentus_update_thickness(const struct device *dev, uint8_t thickness);
+__syscall int ostentus_update_font(const struct device *dev, uint8_t font);
+__syscall int ostentus_clear_text_buffer(const struct device *dev);
+__syscall int ostentus_clear_rectangle(const struct device *dev, uint8_t x, uint8_t y, uint8_t w,
+				       uint8_t h);
+__syscall int ostentus_slide_add(const struct device *dev, uint8_t id, char *str, uint8_t len);
+__syscall int ostentus_slide_set(const struct device *dev, uint8_t id, char *str, uint8_t len);
+__syscall int ostentus_summary_title(const struct device *dev, char *str, uint8_t len);
+__syscall int ostentus_slideshow(const struct device *dev, uint32_t setting);
 __syscall int ostentus_version_get(const struct device *dev, char *buf, uint8_t buf_len);
 __syscall int ostentus_fifo_ready(const struct device *dev, uint8_t *slots_remaining);
 __syscall int ostentus_reset(const struct device *dev);
-__syscall int led_bitmask(const struct device *dev, uint8_t bitmask);
-__syscall int led_power_set(const struct device *dev, uint8_t state);
-__syscall int led_battery_set(const struct device *dev, uint8_t state);
-__syscall int led_internet_set(const struct device *dev, uint8_t state);
-__syscall int led_golioth_set(const struct device *dev, uint8_t state);
-__syscall int led_user_set(const struct device *dev, uint8_t state);
-__syscall int store_text(const struct device *dev, char *str, uint8_t len);
-__syscall int write_text(const struct device *dev, uint8_t x, uint8_t y, uint8_t thickness);
+__syscall int ostentus_led_bitmask(const struct device *dev, uint8_t bitmask);
+__syscall int ostentus_led_power_set(const struct device *dev, uint8_t state);
+__syscall int ostentus_led_battery_set(const struct device *dev, uint8_t state);
+__syscall int ostentus_led_internet_set(const struct device *dev, uint8_t state);
+__syscall int ostentus_led_golioth_set(const struct device *dev, uint8_t state);
+__syscall int ostentus_led_user_set(const struct device *dev, uint8_t state);
+__syscall int ostentus_store_text(const struct device *dev, char *str, uint8_t len);
+__syscall int ostentus_write_text(const struct device *dev, uint8_t x, uint8_t y,
+				  uint8_t thickness);
 __syscall int ostentus_i2c_readbyte(const struct device *dev, uint8_t reg, uint8_t *value);
-__syscall int ostentus_i2c_readarray(const struct device *dev, uint8_t reg, uint8_t *read_reg, uint8_t read_len);
+__syscall int ostentus_i2c_readarray(const struct device *dev, uint8_t reg, uint8_t *read_reg,
+				     uint8_t read_len);
 
 #endif
