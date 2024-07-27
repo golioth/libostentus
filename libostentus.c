@@ -15,40 +15,6 @@ LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
 #include <libostentus.h>
 #include <libostentus_regmap.h>
 
-bool _uninitialized = true;
-bool _is_present = false;
-
-/**
- * @brief Confirm that the Ostentus board is present
- *
- * This function tests to see if the Ostentus board is present by issuing the
- * command to erase memory. If the device is not present to receive the command,
- * the global _is_present will be set to false and all subsequent operations
- * will not try to write to the i2c bus.
- *
- * This function may be run explicitly, or it will be run auotmatically upon the
- * first attempt to write to i2c if the _uninitialized varible is set to true.
- *
- * @return the new value of _is_present
- */
-bool ostentus_i2c_init(void)
-{
-	uint8_t byte = 0x00;
-
-	_uninitialized = false;
-
-	int err = i2c_write_dt(&ostentus_dev, &byte, 1);
-	if (err) {
-		LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
-		LOG_DBG("All future calls to Ostentus functions will not be sent.");
-		_is_present = false;
-	} else {
-		LOG_INF("Ostentus present at i2c address: 0x%02X", ostentus_dev.addr);
-		_is_present = true;
-	}
-	return _is_present;
-}
-
 static int ostentus_i2c_write2(const struct device *dev, uint8_t reg, uint8_t *data1,
 			       uint8_t data1_len, uint8_t *data2, uint8_t data2_len)
 {
@@ -72,14 +38,6 @@ static int ostentus_i2c_write2(const struct device *dev, uint8_t reg, uint8_t *d
 		},
 	};
 	uint8_t num_msgs = ARRAY_SIZE(msgs);
-
-	if (_uninitialized) {
-		ostentus_i2c_init();
-	}
-
-	if (_is_present == false) {
-		return -EFAULT;
-	}
 
 	/* Detect how many i2c messages there are and which is the last one */
 	for (int i = 1; i < ARRAY_SIZE(msgs); i++) {
@@ -244,4 +202,52 @@ static int write_text(const struct device *dev, uint8_t x, uint8_t y, uint8_t th
 {
 	uint8_t data[] = {x, y, thickness};
 	return ostentus_i2c_write1(dev, OSTENTUS_WRITE_TEXT, data, sizeof(data));
+}
+
+static const struct ostentus_driver_api ostentus_api = {
+	.ostentus_clear_memory = &clear_memory,
+	.ostentus_show_splash = &show_splash,
+	.ostentus_update_display = &update_display,
+	.ostentus_update_thickness = &update_thickness,
+	.ostentus_update_font = &update_font,
+	.ostentus_clear_text_buffer = &clear_text_buffer,
+	.ostentus_clear_rectangle = &clear_rectangle,
+	.ostentus_slide_add = &slide_add,
+	.ostentus_slide_set = &slide_set,
+	.ostentus_summary_title = &summary_title,
+	.ostentus_slideshow = &slideshow,
+	.ostentus_version_get = &version_get,
+	.ostentus_fifo_ready = &fifo_ready,
+	.ostentus_reset = &reset,
+	.ostentus_led_bitmask = &led_bitmask,
+	.ostentus_led_power_set = &led_power_set,
+	.ostentus_led_battery_set = &led_battery_set,
+	.ostentus_led_internet_set = &led_internet_set,
+	.ostentus_led_golioth_set = &led_golioth_set,
+	.ostentus_led_user_set = &led_user_set,
+	.ostentus_store_text = &store_text,
+	.ostentus_write_text = &write_text,
+	.ostentus_i2c_readbyte = &i2c_readbyte,
+	.ostentus_i2c_readarray = &i2c_readarray,
+};
+
+static int ostentus_init(const struct device *dev)
+{
+	const struct ostentus_config *config = dev->config;
+
+	if (!device_is_ready(config->i2c.bus)) {
+		LOG_ERR("I2C bus device not ready");
+		return -ENODEV;
+	}
+
+	char buf[32];
+	int err = version_get(dev, buf, 32);
+	if (err) {
+		LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
+		return err;
+	} else {
+		LOG_INF("Ostentus firmware version: %s", buf);
+	}
+
+	return 0;
 }
