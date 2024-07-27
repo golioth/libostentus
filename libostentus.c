@@ -37,7 +37,8 @@ bool _is_present = false;
  *
  * @return the new value of _is_present
  */
-bool ostentus_i2c_init(void) {
+bool ostentus_i2c_init(void)
+{
 	uint8_t byte = 0x00;
 
 	_uninitialized = false;
@@ -47,17 +48,16 @@ bool ostentus_i2c_init(void) {
 		LOG_ERR("Unable to communicate with Ostentus over i2c: %d", err);
 		LOG_DBG("All future calls to Ostentus functions will not be sent.");
 		_is_present = false;
-	}
-	else {
+	} else {
 		LOG_INF("Ostentus present at i2c address: 0x%02X", ostentus_dev.addr);
 		_is_present = true;
 	}
 	return _is_present;
 }
 
-int ostentus_i2c_write2(uint8_t reg,
-			uint8_t *data1, uint8_t data1_len,
-			uint8_t *data2, uint8_t data2_len) {
+int ostentus_i2c_write2(uint8_t reg, uint8_t *data1, uint8_t data1_len, uint8_t *data2,
+			uint8_t data2_len)
+{
 
 	struct i2c_msg msgs[] = {
 		{
@@ -97,128 +97,153 @@ int ostentus_i2c_write2(uint8_t reg,
 	return i2c_transfer_dt(&ostentus_dev, msgs, num_msgs);
 }
 
-int ostentus_i2c_write1(uint8_t reg, uint8_t *data, uint8_t data_len) {
+int ostentus_i2c_write1(uint8_t reg, uint8_t *data, uint8_t data_len)
+{
 	return ostentus_i2c_write2(reg, data, data_len, NULL, 0);
 }
 
-int ostentus_i2c_write0(uint8_t reg) {
+int ostentus_i2c_write0(uint8_t reg)
+{
 	return ostentus_i2c_write2(reg, NULL, 0, NULL, 0);
 }
 
-int ostentus_i2c_readbyte(uint8_t reg, uint8_t *value) {
-  return i2c_write_read_dt(&ostentus_dev, &reg, 1, value, 1);
+int ostentus_i2c_readbyte(uint8_t reg, uint8_t *value)
+{
+	return i2c_write_read_dt(&ostentus_dev, &reg, 1, value, 1);
 }
 
-int ostentus_i2c_readarray(uint8_t reg, uint8_t *read_reg, uint8_t read_len) {
-  int err;
-  uint8_t write_reg[1] = { reg };
-  err = i2c_write_read_dt(&ostentus_dev, write_reg, 1, read_reg, read_len);
-  return err;
+int ostentus_i2c_readarray(uint8_t reg, uint8_t *read_reg, uint8_t read_len)
+{
+	int err;
+	uint8_t write_reg[1] = {reg};
+	err = i2c_write_read_dt(&ostentus_dev, write_reg, 1, read_reg, read_len);
+	return err;
 }
 
-int clear_memory(void) {
+int clear_memory(void)
+{
 	return ostentus_i2c_write0(OSTENTUS_CLEAR_MEM);
 }
 
-int show_splash(void) {
+int show_splash(void)
+{
 	return ostentus_i2c_write0(OSTENTUS_SPLASHSCREEN);
 }
 
-int update_display(void) {
+int update_display(void)
+{
 	return ostentus_i2c_write0(OSTENTUS_REFRESH);
 }
 
-int update_thickness(uint8_t thickness) {
+int update_thickness(uint8_t thickness)
+{
 	return ostentus_i2c_write1(OSTENTUS_THICKNESS, &thickness, 1);
 }
 
-int update_font(uint8_t font) {
+int update_font(uint8_t font)
+{
 	return ostentus_i2c_write1(OSTENTUS_FONT, &font, 1);
 }
 
-int clear_text_buffer(void) {
+int clear_text_buffer(void)
+{
 	return ostentus_i2c_write0(OSTENTUS_CLEAR_TEXT);
 }
 
-int clear_rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
-	uint8_t xywh[] = { x, y, w, h };
+int clear_rectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h)
+{
+	uint8_t xywh[] = {x, y, w, h};
 	return ostentus_i2c_write1(OSTENTUS_CLEAR_RECT, xywh, sizeof(xywh));
 }
 
-int slide_add(uint8_t id, char *str, uint8_t len) {
+int slide_add(uint8_t id, char *str, uint8_t len)
+{
 	return ostentus_i2c_write2(OSTENTUS_SLIDE_ADD, &id, 1, str, len);
 }
 
-int slide_set(uint8_t id, char *str, uint8_t len) {
+int slide_set(uint8_t id, char *str, uint8_t len)
+{
 	return ostentus_i2c_write2(OSTENTUS_SLIDE_SET, &id, 1, str, len);
 }
 
-int summary_title(char *str, uint8_t len) {
+int summary_title(char *str, uint8_t len)
+{
 	return ostentus_i2c_write1(OSTENTUS_SUMMARY_TITLE, str, len);
 }
 
-int slideshow(uint32_t setting) {
+int slideshow(uint32_t setting)
+{
 	union {
 		uint32_t setting_le;
 		uint8_t setting_buf[4];
 	} slideshow_delay_u;
 
 	slideshow_delay_u.setting_le = sys_cpu_to_le32(setting);
-	return ostentus_i2c_write1(OSTENTUS_SLIDESHOW,
-			slideshow_delay_u.setting_buf,
-			sizeof(slideshow_delay_u.setting_buf));
+	return ostentus_i2c_write1(OSTENTUS_SLIDESHOW, slideshow_delay_u.setting_buf,
+				   sizeof(slideshow_delay_u.setting_buf));
 }
 
-int ostentus_version_get(char *buf, uint8_t buf_len) {
-  uint8_t semver[3] = { 0 };
-  int err = ostentus_i2c_readarray(OSTENTUS_GET_VERSION, semver, 3);
-  snprintk(buf, buf_len, "v%d.%d.%d", semver[0], semver[1], semver[2]);
-  return err;
+int ostentus_version_get(char *buf, uint8_t buf_len)
+{
+	uint8_t semver[3] = {0};
+	int err = ostentus_i2c_readarray(OSTENTUS_GET_VERSION, semver, 3);
+	snprintk(buf, buf_len, "v%d.%d.%d", semver[0], semver[1], semver[2]);
+	return err;
 }
 
-int ostentus_fifo_ready(uint8_t *slots_remaining) {
-  return ostentus_i2c_readbyte(OSTENTUS_FIFO_READY, slots_remaining);
+int ostentus_fifo_ready(uint8_t *slots_remaining)
+{
+	return ostentus_i2c_readbyte(OSTENTUS_FIFO_READY, slots_remaining);
 }
 
-int ostentus_reset(void) {
-  uint8_t magic = OSTENTUS_RESET_MAGIC;
-  return ostentus_i2c_write1(OSTENTUS_RESET, &magic, 1);
+int ostentus_reset(void)
+{
+	uint8_t magic = OSTENTUS_RESET_MAGIC;
+	return ostentus_i2c_write1(OSTENTUS_RESET, &magic, 1);
 }
 
-int led_bitmask(uint8_t bitmask) {
-  return ostentus_i2c_write1(OSTENTUS_LED_BITMASK, &bitmask, 1);
+int led_bitmask(uint8_t bitmask)
+{
+	return ostentus_i2c_write1(OSTENTUS_LED_BITMASK, &bitmask, 1);
 }
 
-int led_power_set(uint8_t state) {
+int led_power_set(uint8_t state)
+{
 	uint8_t byte = state ? 1 : 0;
 	return ostentus_i2c_write1(OSTENTUS_LED_POW, &byte, 1);
 }
 
-int led_battery_set(uint8_t state) {
+int led_battery_set(uint8_t state)
+{
 	uint8_t byte = state ? 1 : 0;
 	return ostentus_i2c_write1(OSTENTUS_LED_BAT, &byte, 1);
 }
 
-int led_internet_set(uint8_t state) {
+int led_internet_set(uint8_t state)
+{
 	uint8_t byte = state ? 1 : 0;
 	return ostentus_i2c_write1(OSTENTUS_LED_INT, &byte, 1);
 }
 
-int led_golioth_set(uint8_t state) {
+int led_golioth_set(uint8_t state)
+{
 	uint8_t byte = state ? 1 : 0;
 	return ostentus_i2c_write1(OSTENTUS_LED_GOL, &byte, 1);
 }
 
-int led_user_set(uint8_t state) {
+int led_user_set(uint8_t state)
+{
 	uint8_t byte = state ? 1 : 0;
 	return ostentus_i2c_write1(OSTENTUS_LED_USE, &byte, 1);
 }
 
-int store_text(char *str, uint8_t len) {
+int store_text(char *str, uint8_t len)
+{
 	return ostentus_i2c_write1(OSTENTUS_STORE_TEXT, str, len);
 }
 
-int write_text(uint8_t x, uint8_t y, uint8_t thickness) {
-	uint8_t data[] = { x, y, thickness };
+int write_text(uint8_t x, uint8_t y, uint8_t thickness)
+{
+	uint8_t data[] = {x, y, thickness};
 	return ostentus_i2c_write1(OSTENTUS_WRITE_TEXT, data, sizeof(data));
 }
