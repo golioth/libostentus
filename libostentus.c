@@ -49,8 +49,8 @@ bool ostentus_i2c_init(void)
 	return _is_present;
 }
 
-int ostentus_i2c_write2(const struct device *dev, uint8_t reg, uint8_t *data1, uint8_t data1_len,
-			uint8_t *data2, uint8_t data2_len)
+static int ostentus_i2c_write2(const struct device *dev, uint8_t reg, uint8_t *data1,
+			       uint8_t data1_len, uint8_t *data2, uint8_t data2_len)
 {
 	const struct ostentus_config *config = dev->config;
 
@@ -92,23 +92,24 @@ int ostentus_i2c_write2(const struct device *dev, uint8_t reg, uint8_t *data1, u
 	return i2c_transfer_dt(&config->i2c, msgs, num_msgs);
 }
 
-int ostentus_i2c_write1(const struct device *dev, uint8_t reg, uint8_t *data, uint8_t data_len)
+static int ostentus_i2c_write1(const struct device *dev, uint8_t reg, uint8_t *data,
+			       uint8_t data_len)
 {
 	return ostentus_i2c_write2(dev, reg, data, data_len, NULL, 0);
 }
 
-int ostentus_i2c_write0(const struct device *dev, uint8_t reg)
+static int ostentus_i2c_write0(const struct device *dev, uint8_t reg)
 {
 	return ostentus_i2c_write2(dev, reg, NULL, 0, NULL, 0);
 }
 
-int i2c_readbyte(const struct device *dev, uint8_t reg, uint8_t *value)
+static int i2c_readbyte(const struct device *dev, uint8_t reg, uint8_t *value)
 {
 	const struct ostentus_config *config = dev->config;
 	return i2c_write_read_dt(&config->i2c, &reg, 1, value, 1);
 }
 
-int i2c_readarray(const struct device *dev, uint8_t reg, uint8_t *read_reg, uint8_t read_len)
+static int i2c_readarray(const struct device *dev, uint8_t reg, uint8_t *read_reg, uint8_t read_len)
 {
 	const struct ostentus_config *config = dev->config;
 	int err;
@@ -117,58 +118,58 @@ int i2c_readarray(const struct device *dev, uint8_t reg, uint8_t *read_reg, uint
 	return err;
 }
 
-int clear_memory(const struct device *dev)
+static int clear_memory(const struct device *dev)
 {
 	return ostentus_i2c_write0(dev, OSTENTUS_CLEAR_MEM);
 }
 
-int show_splash(const struct device *dev)
+static int show_splash(const struct device *dev)
 {
 	return ostentus_i2c_write0(dev, OSTENTUS_SPLASHSCREEN);
 }
 
-int update_display(const struct device *dev)
+static int update_display(const struct device *dev)
 {
 	return ostentus_i2c_write0(dev, OSTENTUS_REFRESH);
 }
 
-int update_thickness(const struct device *dev, uint8_t thickness)
+static int update_thickness(const struct device *dev, uint8_t thickness)
 {
 	return ostentus_i2c_write1(dev, OSTENTUS_THICKNESS, &thickness, 1);
 }
 
-int update_font(const struct device *dev, uint8_t font)
+static int update_font(const struct device *dev, uint8_t font)
 {
 	return ostentus_i2c_write1(dev, OSTENTUS_FONT, &font, 1);
 }
 
-int clear_text_buffer(const struct device *dev)
+static int clear_text_buffer(const struct device *dev)
 {
 	return ostentus_i2c_write0(dev, OSTENTUS_CLEAR_TEXT);
 }
 
-int clear_rectangle(const struct device *dev, uint8_t x, uint8_t y, uint8_t w, uint8_t h)
+static int clear_rectangle(const struct device *dev, uint8_t x, uint8_t y, uint8_t w, uint8_t h)
 {
 	uint8_t xywh[] = {x, y, w, h};
 	return ostentus_i2c_write1(dev, OSTENTUS_CLEAR_RECT, xywh, sizeof(xywh));
 }
 
-int slide_add(const struct device *dev, uint8_t id, char *str, uint8_t len)
+static int slide_add(const struct device *dev, uint8_t id, char *str, uint8_t len)
 {
 	return ostentus_i2c_write2(dev, OSTENTUS_SLIDE_ADD, &id, 1, str, len);
 }
 
-int slide_set(const struct device *dev, uint8_t id, char *str, uint8_t len)
+static int slide_set(const struct device *dev, uint8_t id, char *str, uint8_t len)
 {
 	return ostentus_i2c_write2(dev, OSTENTUS_SLIDE_SET, &id, 1, str, len);
 }
 
-int summary_title(const struct device *dev, char *str, uint8_t len)
+static int summary_title(const struct device *dev, char *str, uint8_t len)
 {
 	return ostentus_i2c_write1(dev, OSTENTUS_SUMMARY_TITLE, str, len);
 }
 
-int slideshow(const struct device *dev, uint32_t setting)
+static int slideshow(const struct device *dev, uint32_t setting)
 {
 	union {
 		uint32_t setting_le;
@@ -180,7 +181,7 @@ int slideshow(const struct device *dev, uint32_t setting)
 				   sizeof(slideshow_delay_u.setting_buf));
 }
 
-int version_get(const struct device *dev, char *buf, uint8_t buf_len)
+static int version_get(const struct device *dev, char *buf, uint8_t buf_len)
 {
 	uint8_t semver[3] = {0};
 	int err = ostentus_i2c_readarray(dev, OSTENTUS_GET_VERSION, semver, 3);
@@ -188,58 +189,58 @@ int version_get(const struct device *dev, char *buf, uint8_t buf_len)
 	return err;
 }
 
-int fifo_ready(const struct device *dev, uint8_t *slots_remaining)
+static int fifo_ready(const struct device *dev, uint8_t *slots_remaining)
 {
 	return ostentus_i2c_readbyte(dev, OSTENTUS_FIFO_READY, slots_remaining);
 }
 
-int reset(const struct device *dev)
+static int reset(const struct device *dev)
 {
 	uint8_t magic = OSTENTUS_RESET_MAGIC;
 	return ostentus_i2c_write1(dev, OSTENTUS_RESET, &magic, 1);
 }
 
-int led_bitmask(const struct device *dev, uint8_t bitmask)
+static int led_bitmask(const struct device *dev, uint8_t bitmask)
 {
 	return ostentus_i2c_write1(dev, OSTENTUS_LED_BITMASK, &bitmask, 1);
 }
 
-int led_power_set(const struct device *dev, uint8_t state)
+static int led_power_set(const struct device *dev, uint8_t state)
 {
 	uint8_t byte = state ? 1 : 0;
 	return ostentus_i2c_write1(dev, OSTENTUS_LED_POW, &byte, 1);
 }
 
-int led_battery_set(const struct device *dev, uint8_t state)
+static int led_battery_set(const struct device *dev, uint8_t state)
 {
 	uint8_t byte = state ? 1 : 0;
 	return ostentus_i2c_write1(dev, OSTENTUS_LED_BAT, &byte, 1);
 }
 
-int led_internet_set(const struct device *dev, uint8_t state)
+static int led_internet_set(const struct device *dev, uint8_t state)
 {
 	uint8_t byte = state ? 1 : 0;
 	return ostentus_i2c_write1(dev, OSTENTUS_LED_INT, &byte, 1);
 }
 
-int led_golioth_set(const struct device *dev, uint8_t state)
+static int led_golioth_set(const struct device *dev, uint8_t state)
 {
 	uint8_t byte = state ? 1 : 0;
 	return ostentus_i2c_write1(dev, OSTENTUS_LED_GOL, &byte, 1);
 }
 
-int led_user_set(const struct device *dev, uint8_t state)
+static int led_user_set(const struct device *dev, uint8_t state)
 {
 	uint8_t byte = state ? 1 : 0;
 	return ostentus_i2c_write1(dev, OSTENTUS_LED_USE, &byte, 1);
 }
 
-int store_text(const struct device *dev, char *str, uint8_t len)
+static int store_text(const struct device *dev, char *str, uint8_t len)
 {
 	return ostentus_i2c_write1(dev, OSTENTUS_STORE_TEXT, str, len);
 }
 
-int write_text(const struct device *dev, uint8_t x, uint8_t y, uint8_t thickness)
+static int write_text(const struct device *dev, uint8_t x, uint8_t y, uint8_t thickness)
 {
 	uint8_t data[] = {x, y, thickness};
 	return ostentus_i2c_write1(dev, OSTENTUS_WRITE_TEXT, data, sizeof(data));
