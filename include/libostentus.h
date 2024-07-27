@@ -9,12 +9,6 @@
 #include <stdint.h>
 #include <zephyr/device.h>
 
-#define LED_USE 0x01
-#define LED_GOL 0x02
-#define LED_INT 0x04
-#define LED_BAT 0x08
-#define LED_POW 0x10
-
 typedef int (*ostentus_cmd_t)(const struct device *dev);
 typedef int (*ostentus_getval_8_t)(const struct device *dev, uint8_t *val);
 typedef int (*ostentus_setval_8_t)(const struct device *dev, uint8_t val);
