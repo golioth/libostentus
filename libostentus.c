@@ -251,3 +251,13 @@ static int ostentus_init(const struct device *dev)
 
 	return 0;
 }
+
+#define OSTENTUS_DEFINE(inst)                                                                      \
+	static const struct ostentus_config ostentus_config_##inst = {                             \
+		.i2c = I2C_DT_SPEC_INST_GET(inst),                                                 \
+	};                                                                                         \
+                                                                                                   \
+	DEVICE_DT_INST_DEFINE(inst, ostentus_init, NULL, NULL, &ostentus_config_##inst,            \
+			      POST_KERNEL, 90, &ostentus_api);
+
+DT_INST_FOREACH_STATUS_OKAY(OSTENTUS_DEFINE)
