@@ -1,8 +1,32 @@
-config LIB_OSTENTUS
-	bool "Enable the helper library for the Golioth Ostentus faceplate"
-	default n
-	depends on I2C
+menuconfig LIB_OSTENTUS
+	bool "Enable the driver library for the Golioth Ostentus faceplate"
+	default y
+	depends on DT_HAS_GOLIOTH_OSTENTUS_ENABLED
+	select I2C
 	help
 	  Helper functions for controlling the Golioth Ostentus faceplate.
 	  Features include controlling LEDs, adding slides and slide data,
 	  enabling slideshows, etc.
+
+if LIB_OSTENTUS
+
+config OSTENTUS_INIT_PRIORITY
+	int "Ostentus init priority"
+	default 90
+	help
+	  Ostentus initialization priority.
+
+config OSTENTUS_LOG_LEVEL
+	int "Default log level for libostentus"
+	default 4
+	help
+		The default log level, which is used to filter log messages.
+
+		0: None
+		1: Error
+		2: Warn
+		3: Info
+		4: Debug
+		5: Verbose
+
+endif #LIB_OSTENTUS

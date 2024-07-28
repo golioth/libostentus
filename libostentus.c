@@ -7,7 +7,7 @@
 #define DT_DRV_COMPAT golioth_ostentus
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(ostentus_wrapper, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(ostentus_driver, CONFIG_OSTENTUS_LOG_LEVEL);
 
 #include <zephyr/drivers/i2c.h>
 #include <zephyr/device.h>
@@ -260,6 +260,6 @@ static int ostentus_init(const struct device *dev)
 	};                                                                                         \
                                                                                                    \
 	DEVICE_DT_INST_DEFINE(inst, ostentus_init, NULL, NULL, &ostentus_config_##inst,            \
-			      POST_KERNEL, 90, &ostentus_api);
+			      POST_KERNEL, CONFIG_OSTENTUS_INIT_PRIORITY, &ostentus_api);
 
 DT_INST_FOREACH_STATUS_OKAY(OSTENTUS_DEFINE)
