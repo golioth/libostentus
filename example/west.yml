@@ -1,0 +1,6 @@
+manifest:
+  projects:
+    - name: libostentus
+      path: modules/lib/libostentus
+      revision: main
+      url: https://github.com/golioth/libostentus
