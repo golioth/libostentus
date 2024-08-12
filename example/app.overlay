@@ -1,0 +1,12 @@
+/* Change `ostentus-i2c` to match your device's bus (example: `&i2c2`) */
+
+&ostentus-i2c {
+    /* Needed for I2C writes used by libostentus */
+    zephyr,concat-buf-size = <48>;
+
+    ostentus@12 {
+        status = "okay";
+        compatible = "golioth,ostentus";
+        reg = <0x12>;
+    };
+};
